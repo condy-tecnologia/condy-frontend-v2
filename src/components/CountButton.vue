@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import { useCountStore } from '@/stores/counter'
+  import { useCounterStore } from '@/stores/counter'
 
-  const countStore = useCountStore()
+  const countStore = useCounterStore()
 </script>
 
 <template>
@@ -11,3 +11,9 @@
     <button @click="countStore.decrement">Decrement</button>
   </div>
 </template>
+
+<style scoped>
+  .bg-dark {
+    background-color: #333;
+  }
+</style>
