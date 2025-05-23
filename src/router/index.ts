@@ -1,25 +1,32 @@
-import { useAuthStore } from '@/stores/auth'
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { UnauthorizedError } from '@/boilerplate/Errors';
+import { useAuthStore } from '@/stores/auth';
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    redirect: '/dashboard'
+    redirect: '/dashboard',
   },
+
   {
-    path: '/sign-in',
-    name: 'SignIn',
-    component: () => import('@/views/auth/SignIn.vue'),
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/auth/Login.vue'),
     meta: {
       requiresAuth: false,
-      guestOnly: true // Apenas usuários não autenticados
-    }
+      guestOnly: true, // Apenas usuários não autenticados
+    },
   },
+  /*
   {
-    path: '/sign-up',
-    name: 'SignUp',
-    component: () => import('@/views/auth/SignUp.vue'),
+    path: '/cadastro',
+    name: 'Cadastro',
+    component: () => import('@/views/auth/Cadastro.vue'),
     meta: {
       requiresAuth: false,
       guestOnly: true
@@ -34,15 +41,15 @@ const routes: RouteRecordRaw[] = [
       guestOnly: true
     }
   },
-  {
+  */ {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/Dashboard.vue'),
     meta: {
       requiresAuth: true,
-      roles: ['usuario', 'sindico'] // Ambos podem acessar
-    }
-  },
+      roles: ['usuario', 'sindico'], // Ambos podem acessar
+    },
+  } /*
   {
     path: '/dashboard/sindico',
     name: 'SindicoDashboard',
@@ -76,72 +83,64 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: false
     }
   }
-]
+    */,
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 // Guard global de autenticação
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-  
+  const authStore = useAuthStore();
+
   // Verifica se o token ainda é válido
   if (authStore.token) {
-    const isValid = await authStore.verifyToken()
+    const isValid = await authStore.verifyToken();
     if (!isValid) {
       // Token inválido, limpar e redirecionar
-      authStore.signOut()
+      authStore.signOut();
       if (to.meta.requiresAuth) {
-        return next('/sign-in')
+        return next({
+          path: '/login',
+          query: {
+            notification: new UnauthorizedError().message,
+            notificationType: new UnauthorizedError().notification.type,
+          },
+        });
       }
     }
   }
-  
-  const isAuthenticated = authStore.isAuthenticated
-  const userRole = authStore.user?.role
-  
+
+  const isAuthenticated = authStore.isAuthenticated;
+  const userRole = authStore.user?.role;
+
   // Rota requer autenticação mas usuário não está logado
   if (to.meta.requiresAuth && !isAuthenticated) {
-    return next('/sign-in')
+    return next({
+      path: '/login',
+      query: {
+        notification: new UnauthorizedError().message,
+        notificationType: new UnauthorizedError().notification.type,
+      },
+    });
   }
-  
+
   // Rota apenas para visitantes mas usuário está logado
   if (to.meta.guestOnly && isAuthenticated) {
-    return next('/dashboard')
+    return next('/dashboard');
   }
-  
+
   // Verificar permissões de role
   if (to.meta.roles && isAuthenticated) {
-    const allowedRoles = to.meta.roles as string[]
+    const allowedRoles = to.meta.roles as string[];
     if (!userRole || !allowedRoles.includes(userRole)) {
-      return next('/unauthorized')
+      return next('/unauthorized');
     }
   }
-  
-  next()
-})
 
-// Adicionar meta title baseado na rota
-router.afterEach((to) => {
-  const appName = import.meta.env.VITE_APP_NAME || 'Condy'
-  const routeName = to.name as string
-  
-  const titles: Record<string, string> = {
-    'Home': 'Início',
-    'SignIn': 'Entrar',
-    'SignUp': 'Cadastrar',
-    'CadastroSindico': 'Cadastro de Síndico',
-    'Dashboard': 'Dashboard',
-    'SindicoDashboard': 'Dashboard do Síndico',
-    'Profile': 'Perfil',
-    'Unauthorized': 'Acesso Negado',
-    'NotFound': 'Página Não Encontrada'
-  }
-  
-  const title = titles[routeName] || routeName
-  document.title = `${title} | ${appName}`
-})
+  next();
+});
 
-export default router
+export default router;
