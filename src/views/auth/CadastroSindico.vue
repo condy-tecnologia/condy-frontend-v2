@@ -1,19 +1,26 @@
 <template>
-    <div class="flex flex-col h-screen bg-[#EDF0FB]">
-      <Header />
-  
-      <div class="flex-grow p-4 space-y-4 overflow-y-auto">
+  <div class="flex flex-col h-screen bg-[#EDF0FB]">
+    <Header />
+
+    <div class="flex flex-col flex-grow w-full max-w-6xl mx-auto overflow-hidden">
+
+      <div class="flex-grow p-4 space-y-4 overflow-y-auto" ref="chatAreaContainer">
         <MessageBubble
           v-for="message in messages"
           :key="message.id"
           :text="message.text"
-          :is-user="message.isUser"
-          :timestamp="message.timestamp"
+          :is-user="message.isUser" 
         />
       </div>
-  
-      <InputArea @send-message="handleSendMessage" :disabled="isBotTyping" />
+
+      <div class="px-4 sm:px-5 md:px-6 pb-4 pt-2">
+        <InputArea
+          @send-message="handleSendMessage"
+          :disabled="isBotTyping"
+        />
+      </div>
     </div>
+  </div>
 </template>
   
 <script setup>
@@ -34,7 +41,6 @@ import { nextTick, ref } from 'vue';
         id: messageIdCounter++,
         text,
         isUser: false,
-        timestamp: new Date().toLocaleTimeString()
       });
       isBotTyping.value = false;
       scrollToBottom();
@@ -46,7 +52,6 @@ import { nextTick, ref } from 'vue';
       id: messageIdCounter++,
       text,
       isUser: true,
-      timestamp: new Date().toLocaleTimeString()
     });
     scrollToBottom();
   };
