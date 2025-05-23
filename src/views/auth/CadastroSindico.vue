@@ -14,13 +14,13 @@
   
       <InputArea @send-message="handleSendMessage" :disabled="isBotTyping" />
     </div>
-  </template>
+</template>
   
-  <script setup>
-  import { ref, nextTick } from 'vue';
-  import MessageBubble from '@/components/auth/MessageBubble.vue';
-  import InputArea from '@/components/auth/InputArea.vue';
-  import Header from '@/components/Header.vue';
+<script setup>
+import InputArea from '@/components/auth/InputArea.vue';
+import MessageBubble from '@/components/auth/MessageBubble.vue';
+import Header from '@/components/Header.vue';
+import { nextTick, ref } from 'vue';
 
   const messages = ref([]);
   const isBotTyping = ref(false);
@@ -109,4 +109,4 @@
   // addBotMessage("Olá! Para iniciarmos seu cadastro, por favor, informe o CNPJ da sua empresa.");
   // registrationStep.value = 'awaiting_cnpj'; // Ajustar conforme a interação inicial desejada
   
-  </script>
+</script>
